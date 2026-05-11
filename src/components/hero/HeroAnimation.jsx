@@ -1,411 +1,125 @@
 import { motion } from "framer-motion";
 import { useMemo } from "react";
 
-/* ─── Node Data ─── */
+/* ─── Expanded Node Data with Orbit Assignment ─── */
 const nodes = [
-  {
-    label: "Register",
-    icon: (
-      <path
-        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M14 3.5a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM19 8v6M22 11h-6"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-    ),
-  },
-  {
-    label: "Verify",
-    icon: (
-      <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <path d="M9 12l2 2 4-4" />
-      </g>
-    ),
-  },
-  {
-    label: "Vote",
-    icon: (
-      <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <path d="M14 2v6h6" />
-        <path d="M9 15l2 2 4-4" />
-      </g>
-    ),
-  },
-  {
-    label: "Secure",
-    icon: (
-      <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        <circle cx="12" cy="16" r="1" fill="currentColor" />
-      </g>
-    ),
-  },
-  {
-    label: "Results",
-    icon: (
-      <g stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none">
-        <path d="M18 20V10M12 20V4M6 20v-6" />
-      </g>
-    ),
-  },
+  // Orbit 1 (Inner)
+  { label: "Register", orbit: 120, angle: -60, icon: <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M14 3.5a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM19 8v6M22 11h-6" stroke="currentColor" strokeWidth="1.8" fill="none" /> },
+  { label: "Trust", orbit: 120, angle: 120, icon: <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="1.8" fill="none" /> },
+  
+  // Orbit 2 (Middle)
+  { label: "Verify", orbit: 160, angle: 30, icon: <g stroke="currentColor" strokeWidth="1.8" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></g> },
+  { label: "Secure", orbit: 160, angle: 210, icon: <g stroke="currentColor" strokeWidth="1.8" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></g> },
+  
+  // Orbit 3 (Outer)
+  { label: "Vote", orbit: 210, angle: -130, icon: <g stroke="currentColor" strokeWidth="1.8" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></g> },
+  { label: "Results", orbit: 210, angle: 80, icon: <g stroke="currentColor" strokeWidth="1.8" fill="none"><path d="M18 20V10M12 20V4M6 20v-6" /></g> },
+  { label: "Fast", orbit: 210, angle: 10, icon: <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" strokeWidth="1.8" fill="none" /> },
+  { label: "Global", orbit: 210, angle: -10, icon: <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" fill="none" /> },
 ];
 
-/* ─── SVG Hand (Stylized tap gesture) ─── */
-function HandSVG() {
-  return (
-    <svg
-      viewBox="0 0 120 160"
-      fill="none"
-      className="w-[80px] h-[106px] md:w-[100px] md:h-[133px] lg:w-[120px] lg:h-[160px]"
-      aria-hidden="true"
-    >
-      {/* Index finger */}
-      <path
-        d="M52 12C52 5.4 56 2 60 2s8 3.4 8 10v48H52V12z"
-        stroke="#0B8A4C"
-        strokeWidth="2.2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Middle finger */}
-      <path
-        d="M68 60V28c0-5 3-8 7-8s7 3 7 8v32"
-        stroke="#0B8A4C"
-        strokeWidth="2.2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Ring finger */}
-      <path
-        d="M82 60V36c0-4.5 2.8-7.5 6.5-7.5S95 31.5 95 36v24"
-        stroke="#0B8A4C"
-        strokeWidth="2.2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Pinky */}
-      <path
-        d="M95 60V44c0-4 2.5-6.5 5.5-6.5s5.5 2.5 5.5 6.5v16"
-        stroke="#0B8A4C"
-        strokeWidth="2.2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Palm */}
-      <path
-        d="M38 72h68c2 0 4 2 4 5v20c0 22-16 42-40 42h-4c-24 0-38-18-38-42V77c0-3 2-5 4-5h6z"
-        stroke="#0B8A4C"
-        strokeWidth="2.2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Thumb */}
-      <path
-        d="M38 76c-6 0-14 2-16 10-2 8 2 14 10 16h6"
-        stroke="#0B8A4C"
-        strokeWidth="2.2"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Tap ripple lines */}
-      <circle cx="60" cy="2" r="4" stroke="#0B8A4C" strokeWidth="1" fill="none" opacity="0.3" />
-      <circle cx="60" cy="2" r="10" stroke="#0B8A4C" strokeWidth="0.8" fill="none" opacity="0.15" />
-    </svg>
-  );
-}
-
-/* ─── Main Hero Animation Component ─── */
 export default function HeroAnimation() {
   const CENTER = 250;
-  const ORBIT_RADIUS = 175;
-  const ORBIT_CIRCUMFERENCE = 2 * Math.PI * ORBIT_RADIUS;
+  const orbits = [80, 120, 160, 210];
 
-  /* Calculate pentagon positions */
   const nodePositions = useMemo(() => {
     return nodes.map((node, i) => {
-      const angleDeg = -90 + i * 72; // start from top
-      const angleRad = (angleDeg * Math.PI) / 180;
+      const angleRad = (node.angle * Math.PI) / 180;
       return {
         ...node,
-        x: CENTER + ORBIT_RADIUS * Math.cos(angleRad),
-        y: CENTER + ORBIT_RADIUS * Math.sin(angleRad),
-        angleDeg,
+        x: CENTER + node.orbit * Math.cos(angleRad),
+        y: CENTER + node.orbit * Math.sin(angleRad),
       };
     });
   }, []);
 
   return (
-    <div
-      className="relative w-full max-w-[340px] sm:max-w-[420px] md:max-w-[480px] lg:max-w-[540px] mx-auto aspect-square"
-      role="img"
-      aria-label="Animated illustration showing the 5 steps of the Votex voting process: Register, Verify, Vote, Secure, Results"
-    >
-      <svg
-        viewBox="0 0 500 500"
-        className="w-full h-full"
-        fill="none"
-      >
-        {/* ── Glow Filter Definitions ── */}
+    <div className="relative w-full max-w-[540px] mx-auto aspect-square">
+      <svg viewBox="0 0 500 500" className="w-full h-full" fill="none">
         <defs>
-          <filter id="node-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
           </filter>
-          <filter id="current-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="8" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="20" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-            </feMerge>
-          </filter>
+          
+          <radialGradient id="bg-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.15" />
+            <stop offset="70%" stopColor="#22c55e" stopOpacity="0.05" />
+            <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+          </radialGradient>
 
-          <radialGradient id="center-gradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#0B8A4C" stopOpacity="0.08" />
-            <stop offset="100%" stopColor="#0B8A4C" stopOpacity="0" />
+          <radialGradient id="center-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#22c55e" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* ── Background glow ── */}
-        <circle cx={CENTER} cy={CENTER} r="220" fill="url(#center-gradient)" />
-
-        {/* ── Orbit Ring (base) ── */}
-        <circle
-          cx={CENTER}
-          cy={CENTER}
-          r={ORBIT_RADIUS}
-          stroke="#0B8A4C"
-          strokeWidth="1"
-          strokeDasharray="6 6"
-          fill="none"
-          opacity="0.15"
-        />
-
-        {/* ── Animated Electric Current Arc ── */}
+        {/* ─── Background Glows ─── */}
+        <circle cx={CENTER} cy={CENTER} r="250" fill="url(#bg-glow)" />
         <motion.circle
-          cx={CENTER}
-          cy={CENTER}
-          r={ORBIT_RADIUS}
-          stroke="#10A050"
-          strokeWidth="2.5"
-          strokeDasharray={`${ORBIT_CIRCUMFERENCE * 0.15} ${ORBIT_CIRCUMFERENCE * 0.85}`}
-          strokeLinecap="round"
-          fill="none"
-          filter="url(#current-glow)"
-          initial={{ rotate: -90 }}
-          animate={{ rotate: 270 }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
+          cx={CENTER} cy={CENTER} r="150"
+          fill="url(#center-glow)"
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* ── Second Current Arc (offset) ── */}
-        <motion.circle
-          cx={CENTER}
-          cy={CENTER}
-          r={ORBIT_RADIUS}
-          stroke="#34d399"
-          strokeWidth="1.5"
-          strokeDasharray={`${ORBIT_CIRCUMFERENCE * 0.08} ${ORBIT_CIRCUMFERENCE * 0.92}`}
-          strokeLinecap="round"
-          fill="none"
-          opacity="0.6"
-          filter="url(#current-glow)"
-          initial={{ rotate: 90 }}
-          animate={{ rotate: -270 }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-          style={{ transformOrigin: `${CENTER}px ${CENTER}px` }}
-        />
-
-        {/* ── Connection Lines (node to center) ── */}
-        {nodePositions.map((node, i) => (
-          <motion.line
-            key={`line-${i}`}
-            x1={CENTER}
-            y1={CENTER}
-            x2={node.x}
-            y2={node.y}
-            stroke="#0B8A4C"
-            strokeWidth="0.5"
-            opacity="0.1"
-            strokeDasharray="4 4"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1, delay: 0.3 + i * 0.15 }}
-          />
+        {/* Orbits */}
+        {orbits.map((r, i) => (
+          <circle key={i} cx={CENTER} cy={CENTER} r={r} stroke="#e5e7eb" strokeWidth="1" fill="none" opacity="0.6" />
         ))}
 
-        {/* ── Nodes ── */}
-        {nodePositions.map((node, i) => {
-          const nodeRadius = 32;
-          return (
-            <motion.g
-              key={`node-${i}`}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 20,
-                delay: 0.4 + i * 0.12,
-              }}
-              style={{ transformOrigin: `${node.x}px ${node.y}px` }}
-            >
-              {/* Pulse ring */}
-              <motion.circle
-                cx={node.x}
-                cy={node.y}
-                r={nodeRadius + 6}
-                fill="none"
-                stroke="#10A050"
-                strokeWidth="1"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{
-                  opacity: [0, 0.4, 0],
-                  scale: [0.8, 1.2, 0.8],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  delay: i * 1.2,
-                  ease: "easeInOut",
-                }}
-                style={{ transformOrigin: `${node.x}px ${node.y}px` }}
-              />
+        {/* Green Animated Lines */}
+        <motion.circle
+          cx={CENTER} cy={CENTER} r={orbits[2]}
+          stroke="#22c55e" strokeWidth="1.5" strokeDasharray="30 200" strokeLinecap="round"
+          filter="url(#glow)"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          style={{ transformOrigin: "250px 250px" }}
+        />
+        <motion.circle
+          cx={CENTER} cy={CENTER} r={orbits[3]}
+          stroke="#16a34a" strokeWidth="1" strokeDasharray="50 300" strokeLinecap="round"
+          opacity="0.3"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          style={{ transformOrigin: "250px 250px" }}
+        />
 
-              {/* Node background */}
-              <circle
-                cx={node.x}
-                cy={node.y}
-                r={nodeRadius}
-                fill="white"
-                stroke="#0B8A4C"
-                strokeWidth="1.5"
-              />
-
-              {/* Active highlight (sequential glow) */}
-              <motion.circle
-                cx={node.x}
-                cy={node.y}
-                r={nodeRadius}
-                fill="#ecfdf5"
-                stroke="#10A050"
-                strokeWidth="2"
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: [0, 1, 1, 0],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  delay: i * 1.2,
-                  times: [0, 0.1, 0.3, 0.5],
-                  ease: "easeInOut",
-                }}
-              />
-
-              {/* Icon */}
-              <svg
-                x={node.x - 12}
-                y={node.y - 12}
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                className="text-votex-600"
-              >
-                {node.icon}
-              </svg>
-            </motion.g>
-          );
-        })}
-
-        {/* ── Node Labels ── */}
-        {nodePositions.map((node, i) => {
-          const labelOffset = 48;
-          const angleRad = (node.angleDeg * Math.PI) / 180;
-          const lx = node.x + labelOffset * Math.cos(angleRad) * 0.3;
-          const ly = node.y + labelOffset;
-          return (
-            <motion.text
-              key={`label-${i}`}
-              x={node.x}
-              y={node.angleDeg < 0 ? node.y - 44 : node.y + 52}
-              textAnchor="middle"
-              className="text-[11px] font-semibold fill-neutral-500 select-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 + i * 0.1 }}
-            >
-              {node.label}
-            </motion.text>
-          );
-        })}
-
-        {/* ── Floating Hand (Center) ── */}
+        {/* Central Badge */}
         <motion.g
-          animate={{ y: [0, -6, 0, 6, 0] }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
+          animate={{ y: [0, -5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         >
-          <foreignObject
-            x={CENTER - 60}
-            y={CENTER - 70}
-            width="120"
-            height="160"
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <HandSVG />
-            </div>
-          </foreignObject>
+          <text x={CENTER} y={CENTER - 5} textAnchor="middle" className="text-[32px] font-black fill-neutral-900 tracking-tighter">100k+</text>
+          <text x={CENTER} y={CENTER + 20} textAnchor="middle" className="text-[12px] font-bold fill-neutral-400 uppercase tracking-widest">Votes Secured</text>
         </motion.g>
 
-        {/* ── Center dot ── */}
-        <motion.circle
-          cx={CENTER}
-          cy={CENTER + 50}
-          r="3"
-          fill="#10A050"
-          animate={{
-            opacity: [0.3, 0.8, 0.3],
-            scale: [1, 1.3, 1],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          style={{ transformOrigin: `${CENTER}px ${CENTER + 50}px` }}
-        />
+        {/* Nodes */}
+        {nodePositions.map((node, i) => (
+          <motion.g 
+            key={i} 
+            initial={{ scale: 0, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            transition={{ delay: i * 0.1 }}
+            className="group"
+          >
+            {/* Glow below specific node */}
+            <circle cx={node.x} cy={node.y} r="25" fill="#22c55e" opacity="0.1" filter="url(#glow)" />
+
+            {/* Node Background - All White Circles now, no black */}
+            <circle cx={node.x} cy={node.y} r="22" fill="white" stroke="#e5e7eb" strokeWidth="1" className="shadow-md group-hover:border-votex-400 transition-colors" />
+
+            {/* Icon - All Light Green now */}
+            <svg x={node.x - 10} y={node.y - 10} width="20" height="20" viewBox="0 0 24 24" className="text-votex-500 group-hover:text-votex-600 transition-colors">
+              {node.icon}
+            </svg>
+
+            {/* Subtle Label */}
+            <text x={node.x} y={node.y + 35} textAnchor="middle" className="text-[8px] font-bold fill-neutral-400 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">{node.label}</text>
+          </motion.g>
+        ))}
+
       </svg>
     </div>
   );
