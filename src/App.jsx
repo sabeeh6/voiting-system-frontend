@@ -11,6 +11,14 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import VoterDashboard from "./pages/dashboard/VoterDashboard";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import CandidateManagement from "./pages/admin/CandidateManagement";
+import UserManagement from "./pages/admin/UserManagement";
+import ElectionManagement from "./pages/admin/ElectionManagement";
+import ElectionAnalytics from "./pages/admin/ElectionAnalytics";
+import VoterElections from "./pages/voter/VoterElections";
+import BallotSubmission from "./pages/voter/BallotSubmission";
+import VoterHistory from "./pages/voter/VoterHistory";
+import UserProfile from "./pages/dashboard/UserProfile";
 
 function App() {
   return (
@@ -26,9 +34,10 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<VoterDashboard />} />
-              <Route path="/dashboard/elections" element={<div className="text-white">Elections Page (Coming Soon)</div>} />
-              <Route path="/dashboard/history" element={<div className="text-white">Vote History (Coming Soon)</div>} />
-              <Route path="/dashboard/profile" element={<div className="text-white">User Profile (Coming Soon)</div>} />
+              <Route path="/dashboard/elections" element={<VoterElections />} />
+              <Route path="/dashboard/vote/:electionId" element={<BallotSubmission />} />
+              <Route path="/dashboard/history" element={<VoterHistory />} />
+              <Route path="/dashboard/profile" element={<UserProfile />} />
             </Route>
           </Route>
 
@@ -36,10 +45,12 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/elections" element={<div className="text-white">Election Management (Coming Soon)</div>} />
-              <Route path="/admin/candidates" element={<div className="text-white">Candidate Management (Coming Soon)</div>} />
-              <Route path="/admin/users" element={<div className="text-white">User Management (Coming Soon)</div>} />
+              <Route path="/admin/elections" element={<ElectionManagement />} />
+              <Route path="/admin/analytics/:electionId" element={<ElectionAnalytics />} />
+              <Route path="/admin/candidates" element={<CandidateManagement />} />
+              <Route path="/admin/users" element={<UserManagement />} />
               <Route path="/admin/settings" element={<div className="text-white">System Settings (Coming Soon)</div>} />
+              <Route path="/admin/profile" element={<UserProfile />} />
             </Route>
           </Route>
 
