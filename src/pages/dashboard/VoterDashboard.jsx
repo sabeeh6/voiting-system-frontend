@@ -22,13 +22,18 @@ export default function VoterDashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await api.get("/elections");
-                const elections = response.data.data;
+                const [electionsRes, votesRes] = await Promise.all([
+                    api.get("/elections"),
+                    api.get("/votes/my-history")
+                ]);
+                
+                const elections = electionsRes.data.data;
+                const myVotes = votesRes.data.data;
                 const active = elections.filter(e => e.status === "ongoing").length;
                 
                 setStats({
                     activeElections: active,
-                    totalVotes: user?.hasVoted ? 1 : 0, // Simplified for now
+                    totalVotes: myVotes.length,
                     voterStatus: user?.isVerified ? "Secured" : "Pending"
                 });
             } catch (error) {
@@ -69,8 +74,8 @@ export default function VoterDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {[
                     { label: "Active Elections", value: stats.activeElections, icon: Vote, color: "text-emerald-600", bg: "bg-emerald-50" },
-                    { label: "Verification Status", value: stats.voterStatus, icon: ShieldCheck, color: "text-blue-600", bg: "bg-blue-50" },
-                    { label: "Participation", value: user?.hasVoted ? "Active" : "Ready", icon: UserCheck, color: "text-amber-600", bg: "bg-amber-50" },
+                    { label: "Votes Cast", value: stats.totalVotes, icon: ShieldCheck, color: "text-blue-600", bg: "bg-blue-50" },
+                    { label: "Security Level", value: stats.voterStatus, icon: UserCheck, color: "text-amber-600", bg: "bg-amber-50" },
                 ].map((stat, i) => (
                     <motion.div 
                         key={i}

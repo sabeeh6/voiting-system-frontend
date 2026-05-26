@@ -3,27 +3,23 @@ import {
     History, ShieldCheck, 
     Calendar, MapPin, Flag,
     User, CheckCircle2, Loader2,
-    Lock, ExternalLink
+    Lock, ExternalLink, ArrowRight
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import api from "../../lib/api";
 
 export default function VoterHistory() {
+    const navigate = useNavigate();
     const [votes, setVotes] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                // Fetch the voter's specific report/history
-                // Assuming we use the report endpoint for now or a specific history one
-                const response = await api.get("/votes/report");
-                // In a real project, we would have a dedicated /votes/my-history
-                // For this demo, let's filter from the admin report if needed or mock if not available
-                // Actually, I'll use a mocked data approach if the endpoint doesn't exist for voters
+                const response = await api.get("/votes/my-history");
                 if (response.data.success) {
-                    // Filter for current user (this logic would normally be on backend)
-                    setVotes(response.data.data[0]?.votingHistory || []);
+                    setVotes(response.data.data);
                 }
             } catch (error) {
                 console.error("Failed to fetch history:", error);
@@ -78,8 +74,18 @@ export default function VoterHistory() {
                         <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Retrieving Secure Logs...</p>
                     </div>
                 ) : votes.length === 0 ? (
-                    <div className="py-20 bg-white rounded-[40px] border border-slate-100 text-center">
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">No voting records found.</p>
+                    <div className="py-24 bg-white rounded-[48px] border-2 border-dashed border-slate-100 flex flex-col items-center justify-center text-center">
+                        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
+                            <History className="w-10 h-10 text-slate-200" />
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-900 mb-2">No Records Yet</h3>
+                        <p className="text-slate-400 max-w-xs mb-8">You haven't participated in any electoral cycles yet.</p>
+                        <button 
+                            onClick={() => navigate("/dashboard/elections")}
+                            className="bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-emerald-500 transition-all"
+                        >
+                            Browse Elections <ArrowRight className="w-4 h-4" />
+                        </button>
                     </div>
                 ) : (
                     votes.map((vote, i) => (
@@ -102,7 +108,7 @@ export default function VoterHistory() {
                                             </span>
                                             <span className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
                                                 <Calendar className="w-3.5 h-3.5" /> 
-                                                {new Date(vote.votedAt || Date.now()).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                {new Date(vote.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
                                             </span>
                                         </div>
                                         <h3 className="text-2xl font-black text-slate-900 tracking-tight">Vote cast for {vote.seat}</h3>
@@ -121,10 +127,10 @@ export default function VoterHistory() {
                                     <div className="flex flex-col items-end justify-between">
                                         <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100 text-center min-w-[120px]">
                                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Receipt Hash</p>
-                                            <p className="text-[10px] font-bold text-slate-600 font-mono">0x{Math.random().toString(16).slice(2, 10)}...{Math.random().toString(16).slice(2, 6)}</p>
+                                            <p className="text-[10px] font-bold text-slate-600 font-mono">0x{vote._id.slice(-8).toUpperCase()}...{vote._id.slice(0, 4).toUpperCase()}</p>
                                         </div>
                                         <button className="flex items-center gap-2 text-emerald-600 font-black text-[10px] uppercase tracking-widest hover:underline transition-all">
-                                            Verify on Chain <ExternalLink className="w-3 h-3" />
+                                            Verify Integrity <ExternalLink className="w-3 h-3" />
                                         </button>
                                     </div>
                                 </div>

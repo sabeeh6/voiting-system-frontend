@@ -4,10 +4,12 @@ import {
     ShieldCheck, User, Flag, 
     CheckCircle2, AlertCircle, 
     Loader2, ArrowLeft, Send,
-    Fingerprint, Lock, Info
+    Fingerprint, Lock, Info,
+    ScanLine
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../lib/api";
+import BiometricScanner from "../../components/biometric/BiometricScanner";
 
 export default function BallotSubmission() {
     const { electionId } = useParams();
@@ -17,15 +19,25 @@ export default function BallotSubmission() {
     const [isLoading, setIsLoading] = useState(true);
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
+    const [showBiometric, setShowBiometric] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
 
     useEffect(() => {
         const fetchElectionDetails = async () => {
             try {
-                // We need a specific endpoint for election details or use the list
-                const response = await api.get("/elections");
-                const found = response.data.data.find(e => e._id === electionId);
+                const [electionsRes, votesRes] = await Promise.all([
+                    api.get("/elections"),
+                    api.get("/votes/my-history")
+                ]);
+
+                const found = electionsRes.data.data.find(e => e._id === electionId);
+                const hasVoted = votesRes.data.data.some(v => v.election === electionId);
+
+                if (hasVoted) {
+                    navigate("/dashboard/elections", { replace: true });
+                    return;
+                }
+
                 if (found) {
                     setElection(found);
                 } else {
@@ -38,15 +50,17 @@ export default function BallotSubmission() {
             }
         };
         fetchElectionDetails();
-    }, [electionId]);
+    }, [electionId, navigate]);
 
-    const handleCastVote = async () => {
+    const handleCastVote = async (liveFaceDescriptor) => {
         if (!selectedCandidate) return;
         
         setIsSubmitting(true);
         try {
             const response = await api.post("/votes/cast", { 
-                candidateId: selectedCandidate._id 
+                candidateId: selectedCandidate._id,
+                electionId: electionId,
+                liveFaceDescriptor: liveFaceDescriptor
             });
             
             if (response.data.success) {
@@ -58,10 +72,14 @@ export default function BallotSubmission() {
                 type: "error", 
                 text: error.response?.data?.message || "Voting failed. Please try again." 
             });
-            setShowConfirm(false);
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleBiometricSuccess = (liveDescriptor) => {
+        setShowBiometric(false);
+        handleCastVote(liveDescriptor);
     };
 
     if (isLoading) {
@@ -87,6 +105,17 @@ export default function BallotSubmission() {
 
     return (
         <div className="max-w-5xl mx-auto space-y-10 pb-24">
+            {/* Biometric Scanner Overlay */}
+            <AnimatePresence>
+                {showBiometric && (
+                    <BiometricScanner 
+                        userProfile={{ seat: election.seat }}
+                        onVerified={handleBiometricSuccess}
+                        onCancel={() => setShowBiometric(false)}
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Security Header */}
             <div className="bg-emerald-600 rounded-[48px] p-10 text-white shadow-2xl shadow-emerald-600/30 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
@@ -187,67 +216,13 @@ export default function BallotSubmission() {
                     </div>
                     <button 
                         disabled={!selectedCandidate || isSubmitting}
-                        onClick={() => setShowConfirm(true)}
+                        onClick={() => setShowBiometric(true)}
                         className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-[24px] font-black text-sm transition-all flex items-center gap-3 shadow-xl shadow-emerald-600/20 active:scale-95"
                     >
-                        <Send className="w-5 h-5" /> Proceed to Verify
+                        <ScanLine className="w-5 h-5" /> Proceed to Verify
                     </button>
                 </div>
             </div>
-
-            {/* Confirmation Modal */}
-            <AnimatePresence>
-                {showConfirm && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"
-                        />
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.9, y: 40 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 40 }}
-                            className="relative bg-white w-full max-w-md rounded-[56px] p-10 shadow-2xl overflow-hidden"
-                        >
-                            <div className="text-center mb-10">
-                                <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Fingerprint className="w-10 h-10 text-amber-500" />
-                                </div>
-                                <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight text-balance">Final Confirmation</h2>
-                                <div className="p-6 bg-slate-50 rounded-[32px] border-2 border-slate-100 mb-6">
-                                    <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-2">Voting for candidate</p>
-                                    <p className="text-2xl font-black text-emerald-600 mb-1">{selectedCandidate.name}</p>
-                                    <p className="text-xs font-bold text-slate-500 uppercase">{selectedCandidate.party}</p>
-                                </div>
-                                <div className="flex items-center gap-3 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 mb-8">
-                                    <Info className="w-5 h-5 shrink-0" />
-                                    <p className="text-left text-[10px] font-bold leading-tight uppercase tracking-tight">
-                                        This action is permanent. Once submitted, your vote cannot be changed or revoked.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col gap-3">
-                                <button 
-                                    onClick={handleCastVote}
-                                    disabled={isSubmitting}
-                                    className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black shadow-2xl shadow-slate-900/30 hover:bg-emerald-600 transition-all flex items-center justify-center gap-3"
-                                >
-                                    {isSubmitting ? <Loader2 className="w-6 h-6 animate-spin" /> : "Authorize & Submit Vote"}
-                                </button>
-                                <button 
-                                    onClick={() => setShowConfirm(false)}
-                                    className="w-full py-5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-[24px] font-black transition-all"
-                                >
-                                    Review Selection
-                                </button>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
 }

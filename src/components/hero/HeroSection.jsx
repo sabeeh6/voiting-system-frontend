@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Play, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import HeroAnimation from "./HeroAnimation";
 
 const words = ["Secure.", "Reliable.", "Simple.", "Transparent."];
@@ -80,10 +81,10 @@ export default function HeroSection() {
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <button className="group relative px-8 py-4 bg-votex-600 text-white font-black rounded-2xl premium-shadow hover:premium-shadow-hover hover:bg-votex-700 transition-all flex items-center gap-2 overflow-hidden">
+                <Link to="/register" className="group relative px-8 py-4 bg-votex-600 text-white font-black rounded-2xl premium-shadow hover:premium-shadow-hover hover:bg-votex-700 transition-all flex items-center gap-2 overflow-hidden">
                   Get Started Now
                   <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-                </button>
+                </Link>
                 <button className="px-8 py-4 bg-white text-gray-900 font-black rounded-2xl border-2 border-gray-100 hover:border-votex-200 transition-all flex items-center gap-2">
                   <Play size={18} className="fill-votex-600 text-votex-600" />
                   View Demo

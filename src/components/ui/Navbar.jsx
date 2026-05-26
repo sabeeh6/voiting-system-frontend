@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 
+import { Link } from "react-router-dom";
+
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
@@ -66,18 +68,21 @@ export default function Navbar() {
 
           {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <a href="#" className="text-[13px] font-black text-neutral-600 hover:text-votex-600 transition-colors">
+            <Link to="/login" className="text-[13px] font-black text-neutral-600 hover:text-votex-600 transition-colors">
               Sign In
-            </a>
-            <motion.a
+            </Link>
+            <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              href="#"
-              className="px-6 py-3 bg-votex-600 text-white text-[13px] font-black rounded-xl premium-shadow flex items-center gap-2 group"
             >
-              Get Started
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </motion.a>
+              <Link
+                to="/register"
+                className="px-6 py-3 bg-votex-600 text-white text-[13px] font-black rounded-xl premium-shadow flex items-center gap-2 group"
+              >
+                Get Started
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -114,8 +119,8 @@ export default function Navbar() {
                 </motion.a>
               ))}
               <div className="mt-4 flex flex-col gap-3">
-                <a href="#" className="py-4 text-center font-black text-neutral-600 bg-neutral-50 rounded-2xl">Sign In</a>
-                <a href="#" className="py-4 text-center font-black text-white bg-votex-600 rounded-2xl premium-shadow">Get Started</a>
+                <Link to="/login" className="py-4 text-center font-black text-neutral-600 bg-neutral-50 rounded-2xl">Sign In</Link>
+                <Link to="/register" className="py-4 text-center font-black text-white bg-votex-600 rounded-2xl premium-shadow">Get Started</Link>
               </div>
             </div>
           </motion.div>

@@ -24,7 +24,7 @@ export default function AdminDashboard() {
         const fetchStats = async () => {
             try {
                 const [usersRes, electionsRes] = await Promise.all([
-                    api.get("/users"),
+                    api.get("/auth/users"),
                     api.get("/elections")
                 ]);
 

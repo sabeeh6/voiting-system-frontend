@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../lib/api";
+import { startRegistration } from '@simplewebauthn/browser';
 
 // --- Validation Schemas ---
 
@@ -72,24 +74,27 @@ export default function RegisterPage() {
         mode: "onBlur" // Validate on blur for better UX
     });
 
-    // Load face-api models
+    // Load face-api models only when needed (Step 4) to save bandwidth
     useEffect(() => {
-        const loadModels = async () => {
-            try {
-                const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                    faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-                ]);
-                setModelsLoaded(true);
-            } catch (err) {
-                console.error("Failed to load face models:", err);
-                setServerError("Biometric systems initialization failed. Please refresh.");
-            }
-        };
-        loadModels();
-    }, []);
+        // Start pre-loading at step 3 to ensure they are ready by step 4, or if they jump directly
+        if ((step === 3 || step === 4) && !modelsLoaded) {
+            const loadModels = async () => {
+                try {
+                    const MODEL_URL = "https://justadudewhohacks.github.io/face-api.js/models";
+                    await Promise.all([
+                        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                    ]);
+                    setModelsLoaded(true);
+                } catch (err) {
+                    console.error("Failed to load face models:", err);
+                    setServerError("Biometric systems initialization failed. Please refresh.");
+                }
+            };
+            loadModels();
+        }
+    }, [step, modelsLoaded]);
 
     const nextStep = async () => {
         const fieldsToValidate = 
@@ -179,6 +184,44 @@ export default function RegisterPage() {
             navigate(userRole === "admin" ? "/admin" : "/dashboard");
         } else {
             setServerError(result.message);
+            setIsProcessing(false);
+        }
+    };
+
+    const handleFingerprintCapture = async () => {
+        setIsProcessing(true);
+        setServerError("");
+        try {
+            // 1. Get registration options from server
+            const email = getValues("email");
+            const optionsRes = await api.get(`/auth/register-fingerprint-options?email=${email}`);
+            const options = optionsRes.data.data;
+
+            // 2. Start WebAuthn Registration
+            const credential = await startRegistration(options);
+
+            const credentialData = {
+                credentialId: credential.id,
+                publicKey: JSON.stringify(credential.response), // Securely capture the raw attestation response
+                counter: 0
+            };
+
+            // 3. Store the credential in form
+            setValue("fingerprint", credentialData);
+            
+            // 4. Immediate Senior Dev Validation
+            const isValid = await trigger("fingerprint");
+            if (!isValid) {
+                setServerError("Cryptographic validation of your fingerprint failed. Please ensure the scan is clean and try again.");
+                return;
+            }
+            
+            // Move to next step automatically only if valid
+            setStep(4);
+        } catch (err) {
+            console.error("Fingerprint capture failed:", err);
+            setServerError(err.message || "Hardware biometric scan failed. Please ensure your device supports fingerprint/biometric login.");
+        } finally {
             setIsProcessing(false);
         }
     };
@@ -306,7 +349,7 @@ export default function RegisterPage() {
                         </div>
                         <button 
                             type="button"
-                            onClick={handleFingerprint} 
+                            onClick={handleFingerprintCapture} 
                             disabled={isProcessing}
                             className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20"
                         >

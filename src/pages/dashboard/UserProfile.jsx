@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { 
     User, Mail, Fingerprint, 
-    ShieldCheck, Key, LogOut,
+    ShieldCheck, Key,
     CheckCircle2, Camera, Bell,
     Globe, Smartphone, Loader2,
     ShieldAlert
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../lib/api";
 
 export default function UserProfile() {
-    const { user, logout } = useAuth();
+    const { user } = useAuth();
     const [isUpdating, setIsUpdating] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -148,13 +147,6 @@ export default function UserProfile() {
                                 className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-[24px] font-black shadow-xl shadow-emerald-600/20 transition-all flex items-center justify-center gap-3"
                             >
                                 {isUpdating ? <Loader2 className="w-6 h-6 animate-spin" /> : "Save Profile Configuration"}
-                            </button>
-
-                            <button 
-                                onClick={logout}
-                                className="w-full py-5 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white rounded-[24px] font-black transition-all flex items-center justify-center gap-3"
-                            >
-                                <LogOut className="w-5 h-5" /> De-authorize Session
                             </button>
                         </div>
                     </div>
