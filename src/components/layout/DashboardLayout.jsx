@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { 
     LayoutDashboard, Vote, History, User, 
     Settings, LogOut, Menu, X, Bell, 
-    Shield, Users, ChevronRight, Gavel
+    Shield, Users, ChevronRight, Gavel, Activity
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
@@ -26,6 +26,7 @@ export default function DashboardLayout() {
         { name: "Manage Elections", path: "/admin/elections", icon: Shield },
         { name: "Candidates", path: "/admin/candidates", icon: Users },
         { name: "Users", path: "/admin/users", icon: Users },
+        { name: "Audit Trail", path: "/admin/audit-logs", icon: Activity },
         { name: "Settings", path: "/admin/settings", icon: Settings },
     ];
 

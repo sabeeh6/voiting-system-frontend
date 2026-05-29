@@ -15,6 +15,8 @@ import CandidateManagement from "./pages/admin/CandidateManagement";
 import UserManagement from "./pages/admin/UserManagement";
 import ElectionManagement from "./pages/admin/ElectionManagement";
 import ElectionAnalytics from "./pages/admin/ElectionAnalytics";
+import AuditLogsPage from "./pages/admin/AuditLogsPage";
+import UserLogDetailsPage from "./pages/admin/UserLogDetailsPage";
 import VoterElections from "./pages/voter/VoterElections";
 import BallotSubmission from "./pages/voter/BallotSubmission";
 import VoterHistory from "./pages/voter/VoterHistory";
@@ -49,6 +51,8 @@ function App() {
               <Route path="/admin/analytics/:electionId" element={<ElectionAnalytics />} />
               <Route path="/admin/candidates" element={<CandidateManagement />} />
               <Route path="/admin/users" element={<UserManagement />} />
+              <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
+              <Route path="/admin/users/:userId/logs" element={<UserLogDetailsPage />} />
               <Route path="/admin/settings" element={<div className="text-white">System Settings (Coming Soon)</div>} />
               <Route path="/admin/profile" element={<UserProfile />} />
             </Route>
